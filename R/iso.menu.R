@@ -56,7 +56,7 @@ iso.menu <- function(){
           cat("---step.1 finished!---\n")
           cat("---step.2 Creating resample list use MCMC method and probability threshold\n")
           mcmc.list <- iso.mcmc(threshold.result = threshold.list, numbers = length(threshold.list$sample_list), iter = 1000)
-          apportion.table <- iso.apportion(mcmc.result = mcmc.list, run = 1000)
+          apportion.table <- iso.apportion(mcmc.result = mcmc.list)
           cat("---step.2 finished---\n")
           cat("---step.3 Drawing histograms...---\n")
           iso.histograms(apportion.table, numbers = length(threshold.list$sample_list))

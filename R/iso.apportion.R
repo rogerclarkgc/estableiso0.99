@@ -5,7 +5,7 @@
 #' @param mcmc.result the output of function iso.mcmc
 #' @param run the rownumber of mcmc table
 #' @export
-iso.apportion <- function(mcmc.result = list(), run = 1000){ 
+iso.apportion <- function(mcmc.result = list()){
   random.eu <- c(NULL)
   random.eumatrix <- data.frame()
   eu.v <- c(NULL)
@@ -13,6 +13,7 @@ iso.apportion <- function(mcmc.result = list(), run = 1000){
   source.list <- mcmc.result$sample.list
   mcmc.table <- mcmc.result$mcmc.table
   numbers <- mcmc.result$numbers
+  run <- nrow(mcmc.table)
   if(length(source.list) == 0) stop("source.list cannot be 0")
   for(i in 1 : run)
   {

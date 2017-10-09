@@ -10,7 +10,8 @@
 #' @export
 #' @examples
 iso.threshold <-
-  function(source.matrix = 0 , mixture.matrix = 0 ,correctiso.matrix = NULL, simplemode = FALSE, howmany = 0.1)
+  function(source.matrix = 0 , mixture.matrix = 0 ,correctiso.matrix = NULL, simplemode = FALSE, howmany = 1,
+           prob = rep(1, nrow(mixture.matrix)))
   {
     #time.start <- Sys.time()
     #source.eu <- c(NULL)
@@ -24,25 +25,30 @@ iso.threshold <-
       source.matrix <- source.matrix + correctiso.matrix
       cat("Source matrix has been corrected ")
     }
-    for(i in 1:nrow(source.matrix))			#the first circulation structure is the source numbers 
+    for(i in 1:nrow(source.matrix))			# the first circulation structure is the source numbers 
     {
       j <- 1
+      sigmaso <- matrix(c(source.matrix[i, 3]^2, 
+                          source.matrix[i, 3]*source.matrix[i, 5]*0,
+                          source.matrix[i, 3]*source.matrix[i, 5]*0,
+                          source.matrix[i, 5]^2),ncol = 2)
+      meanso <- c(source.matrix[i, 4], source.matrix[i, 6])
       while(j <= 1000)
-      {
-        source.sample <- c(rnorm(1, mean = source.matrix[i, 4], sd = source.matrix[i, 3]), rnorm(1, mean = source.matrix[i, 6], sd = source.matrix[i, 5]))  	#get the rnorm density for source i
-        
-        
-        
-        
-          
-          rho <- euclideanmetric(source.sample, mixture.matrix) #caculate the euclidean metric between mixture and 1 rnorm sample
-          source.sample[3] <- rho
-          sample.matrix[j, 1] <- source.sample[1] # get a sample matrix for source i 
-          sample.matrix[j, 2] <- source.sample[2]
-          sample.matrix[j, 3] <- source.sample[3]
-          cat("random source sample :", source.sample,"  ")
-          cat("this is the",j, "round!\n")
-          j <- j + 1
+      {# generate a random source vector from two indepedent normal distributon.
+       # source.sample <- c(rnorm(1, mean = source.matrix[i, 4], sd = source.matrix[i, 3]), 
+                           #rnorm(1, mean = source.matrix[i, 6], sd = source.matrix[i, 5]))  	#get the rnorm density for source i
+        source.sample <- as.vector(rmvnorm(1, mean = meanso, sigma = sigmaso))
+        sumeu <- apply(mixture.matrix, 1, FUN = euclideanmetric, a = source.sample) * prob
+        sumeu <- sum(sumeu)
+        rho <- sumeu/nrow(mixture.matrix)
+        #rho <- euclideanmetric(source.sample, mixture.matrix) #caculate the euclidean metric between mixture and 1 rnorm sample
+        source.sample[3] <- rho
+        sample.matrix[j, 1] <- source.sample[1] # get a sample matrix for source i 
+        sample.matrix[j, 2] <- source.sample[2]
+        sample.matrix[j, 3] <- source.sample[3]
+        cat("random source sample :", source.sample,"  ")
+        cat("this is the",j, "round!\n")
+        j <- j + 1
         
         attributes(sample.matrix)$names <- c(colnames(source.matrix)[1], colnames(source.matrix)[2], "rho")    
       }
@@ -58,9 +64,15 @@ iso.threshold <-
     probframe <- data.frame()
     for(k in 1 : (rowno * howmany) ){
       prob <- 1
-      for(l in 1 : sourceno){
+      for(l in 1 : sourceno){#caculate the probability of random sources combination
         sampleone<- sample.list[[l]][(sample(rowno, 1, replace = FALSE)), ]
-        sample.prob1 <- pnorm(sampleone[, 1], sd = source.matrix[l, 3], mean = source.matrix[l, 4])
+        if(sampleone[, 1] <= source.matrix[l, 4]){
+          sample.prob1 <- pnorm(sampleone[, 1], sd = source.matrix[l, 3], mean = source.matrix[l, 4])
+        }
+        else{
+          sampleone_c <- source.matrix[l, 4] - (sampleone[, 1] - source.matrix[l, 4])
+          sample.prob1 <- pnorm(sampleone_c, sd = source.matrix[l, 3], mean = source.matrix[l, 4])
+        }
         prob <- prob * sample.prob1
         #cat("prob:", prob, "\n")
       }

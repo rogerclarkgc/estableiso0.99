@@ -38,7 +38,7 @@ iso.demo <- function(){
   invisible()
   choose <- menu(c("Using Montel Carlo sampling method only(faster).", "Using Montel Carlo Markov Chain sampling method and probability threshold(better robust, but slowly)"), title = "Choose a method")
   if(choose == 1){
-    datalist <- list(sources = sources, mixture = apply(geese, 2, mean))
+    datalist <- list(sources = sources, mixture = geese)
     start <- Sys.time()
     cat("---step.1 Creating random sample list---\n")
     sample.list <- iso.euclidean2(source.matrix = datalist$sources, mixture.matrix = datalist$mixture)
@@ -61,11 +61,11 @@ iso.demo <- function(){
   if(choose == 2){
     start <- Sys.time()
     cat("---step.1 Creating random sample list and set the probability threshold---\n")
-    threshold.list <- iso.threshold(source.matrix = sources, mixture.matrix = apply(geese, 2, mean), simplemode = FALSE, correctiso.matrix = NULL)
+    threshold.list <- iso.threshold(source.matrix = sources, mixture.matrix = geese, simplemode = FALSE, correctiso.matrix = NULL)
     cat("---step.1 finished!---\n")
     cat("---step.2 Creating resample list use MCMC method and probability threshold\n")
     mcmc.list <- iso.mcmc(threshold.result = threshold.list, numbers = length(threshold.list$sample_list), iter = 1000)
-    apportion.table <- iso.apportion(mcmc.result = mcmc.list, run = 1000)
+    apportion.table <- iso.apportion(mcmc.result = mcmc.list)
     cat("---step.2 finished---\n")
     cat("---step.3 Drawing histograms...---\n")
     iso.histograms(apportion.table, numbers = length(threshold.list$sample_list))
