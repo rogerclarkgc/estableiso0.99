@@ -16,10 +16,18 @@ function(datalist = list(), group = 0){
   mixture <- datalist$mixture
   snum <- nrow(sources)
   mnum <- nrow(mixture)
-  xr <- max(sources[, 4] + sources[, 3], mixture[, 1]) + 3
-  xl <- min(sources[, 4] - sources[, 3], mixture[, 1]) - 3
-  yr <- max(sources[, 6] + sources[, 5], mixture[, 2]) + 3
-  yl <- min(sources[, 6] - sources[, 5], mixture[, 2]) - 3
+  #hoffset <- 0.1
+  #voffset <- 0.1
+  xr <- max(sources[, 4] + sources[, 3], mixture[, 1])
+  xl <- min(sources[, 4] - sources[, 3], mixture[, 1])
+  hoffset <- sum(abs(c(xr, xl)))/4
+  xr <- xr + hoffset
+  xl <- xl - hoffset
+  yr <- max(sources[, 6] + sources[, 5], mixture[, 2])
+  yl <- min(sources[, 6] - sources[, 5], mixture[, 2])
+  voffset <- sum(abs(c(yr, yl)))/4
+  yr <- yr + voffset
+  yl <- yl - voffset
   legend <- c(rownames(sources), "data")
   legend_col <- c(1:snum, "darkblue")
   legend_pch <- c(1:snum+4, 16)
